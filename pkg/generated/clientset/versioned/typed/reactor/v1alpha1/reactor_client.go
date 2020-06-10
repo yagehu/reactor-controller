@@ -3,9 +3,8 @@
 package v1alpha1
 
 import (
-	"pkg/generated/clientset/versioned/scheme"
-
 	v1alpha1 "github.com/yagehu/reactor-controller/pkg/apis/reactor/v1alpha1"
+	"github.com/yagehu/reactor-controller/pkg/generated/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 

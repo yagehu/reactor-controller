@@ -3,13 +3,13 @@
 package externalversions
 
 import (
-	versioned "pkg/generated/clientset/versioned"
-	internalinterfaces "pkg/generated/informers/externalversions/internalinterfaces"
-	reactor "pkg/generated/informers/externalversions/reactor"
 	reflect "reflect"
 	sync "sync"
 	time "time"
 
+	versioned "github.com/yagehu/reactor-controller/pkg/generated/clientset/versioned"
+	internalinterfaces "github.com/yagehu/reactor-controller/pkg/generated/informers/externalversions/internalinterfaces"
+	reactor "github.com/yagehu/reactor-controller/pkg/generated/informers/externalversions/reactor"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

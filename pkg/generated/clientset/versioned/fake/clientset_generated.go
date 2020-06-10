@@ -3,10 +3,9 @@
 package fake
 
 import (
-	clientset "pkg/generated/clientset/versioned"
-	huyagev1alpha1 "pkg/generated/clientset/versioned/typed/reactor/v1alpha1"
-	fakehuyagev1alpha1 "pkg/generated/clientset/versioned/typed/reactor/v1alpha1/fake"
-
+	clientset "github.com/yagehu/reactor-controller/pkg/generated/clientset/versioned"
+	huyagev1alpha1 "github.com/yagehu/reactor-controller/pkg/generated/clientset/versioned/typed/reactor/v1alpha1"
+	fakehuyagev1alpha1 "github.com/yagehu/reactor-controller/pkg/generated/clientset/versioned/typed/reactor/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

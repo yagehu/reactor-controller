@@ -4,12 +4,12 @@ package v1alpha1
 
 import (
 	"context"
-	versioned "pkg/generated/clientset/versioned"
-	internalinterfaces "pkg/generated/informers/externalversions/internalinterfaces"
-	v1alpha1 "pkg/generated/listers/reactor/v1alpha1"
 	time "time"
 
 	reactorv1alpha1 "github.com/yagehu/reactor-controller/pkg/apis/reactor/v1alpha1"
+	versioned "github.com/yagehu/reactor-controller/pkg/generated/clientset/versioned"
+	internalinterfaces "github.com/yagehu/reactor-controller/pkg/generated/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/yagehu/reactor-controller/pkg/generated/listers/reactor/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
