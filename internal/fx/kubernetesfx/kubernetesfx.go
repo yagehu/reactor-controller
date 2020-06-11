@@ -29,8 +29,8 @@ type Result struct {
 func New(p Params) (Result, error) {
 	clientset, err := kubernetes.NewForConfig(&rest.Config{
 		Host: "http://" + net.JoinHostPort(
-			p.Config.Kubernetes.APIServerHost,
-			p.Config.Kubernetes.APIServerPort,
+			p.Config.Kubernetes.ApiServer.Host,
+			p.Config.Kubernetes.ApiServer.Port,
 		),
 	})
 	if err != nil {
