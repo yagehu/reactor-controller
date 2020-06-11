@@ -24,6 +24,10 @@ const (
 type Config struct {
 	RuntimeEnvironment RuntimeEnvironment `yaml:"-"`
 
+	Controller struct {
+		WorkQueueEventRetries int `yaml:"work_queue_event_retries"`
+	} `yaml:"controller"`
+
 	Kubernetes struct {
 		ApiServer struct {
 			Host string `yaml:"host"`

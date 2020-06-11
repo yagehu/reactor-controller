@@ -1,3 +1,6 @@
+controller:
+  work_queue_event_retries: 5
+
 kubernetes:
   api_server:
     host: localhost
