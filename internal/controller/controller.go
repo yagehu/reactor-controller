@@ -75,11 +75,39 @@ func New(p Params) (*Controller, error) {
 
 				wq.Add(entity.Event{
 					Key:         key,
+					Type:        entity.EventTypeCreate,
 					ReactorSpec: reactor.Spec,
 				})
 			},
 			UpdateFunc: func(oldObj, newObj interface{}) {
-				p.Logger.Info("Updated")
+				key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(newObj)
+				if err != nil {
+					p.Logger.Error(
+						"Could not make key for API object.",
+						zap.Error(err),
+						zap.Any("newObject", newObj),
+						zap.Any("oldObject", oldObj),
+					)
+
+					return
+				}
+
+				reactor, ok := newObj.(*v1alpha1.Reactor)
+				if !ok {
+					p.Logger.Error(
+						"Not a Reactor object.",
+						zap.Any("newObject", newObj),
+						zap.Any("oldObject", oldObj),
+					)
+
+					return
+				}
+
+				wq.Add(entity.Event{
+					Key:         key,
+					Type:        entity.EventTypeUpdate,
+					ReactorSpec: reactor.Spec,
+				})
 			},
 			DeleteFunc: func(obj interface{}) {
 				key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
@@ -92,7 +120,21 @@ func New(p Params) (*Controller, error) {
 					return
 				}
 
-				wq.Add(key)
+				reactor, ok := obj.(*v1alpha1.Reactor)
+				if !ok {
+					p.Logger.Error(
+						"Not a Reactor object.",
+						zap.Any("object", obj),
+					)
+
+					return
+				}
+
+				wq.Add(entity.Event{
+					Key:         key,
+					Type:        entity.EventTypeDelete,
+					ReactorSpec: reactor.Spec,
+				})
 			},
 		},
 	)
