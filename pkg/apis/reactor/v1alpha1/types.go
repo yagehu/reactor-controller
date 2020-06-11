@@ -8,7 +8,7 @@ const (
 	Kind      string = "Reactor"
 	Version   string = "v1alpha1"
 	Plural    string = "reactors"
-	Singluar  string = "reactor"
+	Singlular string = "reactor"
 	ShortName string = "rt"
 	Name      string = Plural + "." + GroupName
 )

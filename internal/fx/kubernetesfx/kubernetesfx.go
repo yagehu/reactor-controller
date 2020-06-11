@@ -24,15 +24,18 @@ type Result struct {
 	fx.Out
 
 	Client kubernetes.Interface
+	Config *rest.Config
 }
 
 func New(p Params) (Result, error) {
-	clientset, err := kubernetes.NewForConfig(&rest.Config{
+	conf := rest.Config{
 		Host: "http://" + net.JoinHostPort(
 			p.Config.Kubernetes.ApiServer.Host,
 			p.Config.Kubernetes.ApiServer.Port,
 		),
-	})
+	}
+
+	clientset, err := kubernetes.NewForConfig(&conf)
 	if err != nil {
 		return Result{}, err
 	}
@@ -49,5 +52,6 @@ func New(p Params) (Result, error) {
 
 	return Result{
 		Client: clientset,
+		Config: &conf,
 	}, nil
 }
