@@ -19,7 +19,7 @@ import (
 	"github.com/yagehu/reactor-controller/pkg/generated/clientset/versioned"
 	"github.com/yagehu/reactor-controller/pkg/generated/clientset/versioned/scheme"
 	"github.com/yagehu/reactor-controller/pkg/generated/informers/externalversions"
-	v1alpha12 "github.com/yagehu/reactor-controller/pkg/generated/informers/externalversions/reactor/v1alpha1"
+	reactorv1alpha1 "github.com/yagehu/reactor-controller/pkg/generated/informers/externalversions/reactor/v1alpha1"
 )
 
 var Module = fx.Options(
@@ -155,7 +155,7 @@ type Controller struct {
 	logger    *zap.Logger
 	workQueue workqueue.RateLimitingInterface
 	stopCh    chan struct{}
-	informer  v1alpha12.ReactorInformer
+	informer  reactorv1alpha1.ReactorInformer
 }
 
 func (c *Controller) processNextItem() bool {
