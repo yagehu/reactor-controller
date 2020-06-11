@@ -184,6 +184,7 @@ func startController(lifecycle fx.Lifecycle, c *Controller) {
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
+			c.logger.Info("Shutting down work queue.")
 			c.workQueue.ShutDown()
 			close(c.stopCh)
 
@@ -230,7 +231,7 @@ func (c *Controller) processNextItem() bool {
 		c.workQueue.Forget(newEvent)
 	}
 
-	// No error, reset the ratelimit counters
+	// No error, reset the rate limit counters.
 	c.workQueue.Forget(newEvent)
 
 	return true
