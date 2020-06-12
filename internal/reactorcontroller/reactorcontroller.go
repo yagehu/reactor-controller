@@ -19,7 +19,6 @@ import (
 	"github.com/yagehu/reactor-controller/pkg/generated/clientset/versioned"
 	"github.com/yagehu/reactor-controller/pkg/generated/clientset/versioned/scheme"
 	"github.com/yagehu/reactor-controller/pkg/generated/informers/externalversions"
-	reactorv1alpha1 "github.com/yagehu/reactor-controller/pkg/generated/informers/externalversions/reactor/v1alpha1"
 )
 
 var Module = fx.Options(fx.Invoke(Start))
@@ -143,7 +142,6 @@ func Start(p Params) error {
 		logger:            p.Logger,
 		workQueue:         wq,
 		stopCh:            stopCh,
-		informer:          sharedInformer,
 		reactorController: p.ReactorController,
 	}
 
@@ -153,14 +151,16 @@ func Start(p Params) error {
 
 			// wait for the caches to synchronize before starting the worker
 			if !cache.WaitForNamedCacheSync(
-				"reactor-controller", c.stopCh, c.informer.Informer().HasSynced,
+				"reactor-controller",
+				c.stopCh,
+				sharedInformer.Informer().HasSynced,
 			) {
 				return errors.New("timed out waiting for caches to sync")
 			}
 
 			c.logger.Info("Reactor controller synced and ready.")
 
-			go c.informer.Informer().Run(c.stopCh)
+			go sharedInformer.Informer().Run(c.stopCh)
 			go func() {
 				// Loop until "something bad" happens.
 				// The .Until will then rekick the worker after one second.
@@ -193,7 +193,6 @@ type Controller struct {
 	logger            *zap.Logger
 	workQueue         workqueue.RateLimitingInterface
 	stopCh            chan struct{}
-	informer          reactorv1alpha1.ReactorInformer
 	reactorController reactorcontroller.Controller
 }
 
