@@ -18,7 +18,7 @@ const (
 	_envKeyRuntimeEnvironment = "RUNTIME_ENVIRONMENT"
 
 	RuntimeEnvironmentDevelopment RuntimeEnvironment = "development"
-	RuntimeEnvironmentProduction                     = "production"
+	RuntimeEnvironmentProduction  RuntimeEnvironment = "production"
 )
 
 type Config struct {
@@ -51,7 +51,9 @@ func New() (Config, error) {
 		config.File(filepath.Join(configDir, "base.yaml")),
 	}
 
-	switch os.Getenv(_envKeyPrefix + _envKeyRuntimeEnvironment) {
+	switch RuntimeEnvironment(
+		os.Getenv(_envKeyPrefix + _envKeyRuntimeEnvironment),
+	) {
 	case RuntimeEnvironmentProduction:
 		runtimeEnvironment = RuntimeEnvironmentProduction
 	default:
