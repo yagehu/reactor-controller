@@ -9,6 +9,7 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/yagehu/reactor-controller/config"
+	"github.com/yagehu/reactor-controller/pkg/generated/clientset/versioned"
 )
 
 var Module = fx.Provide(New)
@@ -23,8 +24,9 @@ type Params struct {
 type Result struct {
 	fx.Out
 
-	Client kubernetes.Interface
-	Config *rest.Config
+	Client        kubernetes.Interface
+	Config        *rest.Config
+	ReactorClient versioned.Interface
 }
 
 func New(p Params) (Result, error) {
@@ -50,8 +52,14 @@ func New(p Params) (Result, error) {
 		zap.String("version", version.String()),
 	)
 
+	reactorClient, err := versioned.NewForConfig(&conf)
+	if err != nil {
+		return Result{}, err
+	}
+
 	return Result{
-		Client: clientset,
-		Config: &conf,
+		Client:        clientset,
+		Config:        &conf,
+		ReactorClient: reactorClient,
 	}, nil
 }

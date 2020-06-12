@@ -31,21 +31,17 @@ type Params struct {
 	Lifecycle         fx.Lifecycle
 	Logger            *zap.Logger
 	KubernetesConfig  *rest.Config
+	ReactorClient     versioned.Interface
 	ReactorController reactorcontroller.Controller
 }
 
 func Start(p Params) error {
-	reactorClient, err := versioned.NewForConfig(p.KubernetesConfig)
-	if err != nil {
-		return err
-	}
-
 	stopCh := make(chan struct{})
 	wq := workqueue.NewRateLimitingQueue(
 		workqueue.DefaultControllerRateLimiter(),
 	)
 	sharedInformerFactory := externalversions.NewSharedInformerFactory(
-		reactorClient, time.Minute,
+		p.ReactorClient, time.Minute,
 	)
 	sharedInformer := sharedInformerFactory.Huyage().V1alpha1().Reactors()
 	sharedInformer.Informer().AddEventHandler(
