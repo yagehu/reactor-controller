@@ -1,9 +1,8 @@
-package controller
+package reactorcontroller
 
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"go.uber.org/fx"
@@ -14,6 +13,7 @@ import (
 	"k8s.io/client-go/util/workqueue"
 
 	"github.com/yagehu/reactor-controller/config"
+	reactorcontroller "github.com/yagehu/reactor-controller/internal/controller/reactor"
 	"github.com/yagehu/reactor-controller/internal/entity"
 	"github.com/yagehu/reactor-controller/pkg/apis/reactor/v1alpha1"
 	"github.com/yagehu/reactor-controller/pkg/generated/clientset/versioned"
@@ -22,24 +22,22 @@ import (
 	reactorv1alpha1 "github.com/yagehu/reactor-controller/pkg/generated/informers/externalversions/reactor/v1alpha1"
 )
 
-var Module = fx.Options(
-	fx.Provide(New),
-	fx.Invoke(startController),
-)
+var Module = fx.Options(fx.Invoke(Start))
 
 type Params struct {
 	fx.In
 
-	Config           config.Config
-	Lifecycle        fx.Lifecycle
-	Logger           *zap.Logger
-	KubernetesConfig *rest.Config
+	Config            config.Config
+	Lifecycle         fx.Lifecycle
+	Logger            *zap.Logger
+	KubernetesConfig  *rest.Config
+	ReactorController reactorcontroller.Controller
 }
 
-func New(p Params) (*Controller, error) {
+func Start(p Params) error {
 	reactorClient, err := versioned.NewForConfig(p.KubernetesConfig)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	stopCh := make(chan struct{})
@@ -141,20 +139,19 @@ func New(p Params) (*Controller, error) {
 	sharedInformerFactory.Start(stopCh)
 
 	if err := v1alpha1.AddToScheme(scheme.Scheme); err != nil {
-		return &Controller{}, err
+		return err
 	}
 
-	return &Controller{
-		config:    p.Config,
-		logger:    p.Logger,
-		workQueue: wq,
-		stopCh:    stopCh,
-		informer:  sharedInformer,
-	}, nil
-}
+	c := &Controller{
+		config:            p.Config,
+		logger:            p.Logger,
+		workQueue:         wq,
+		stopCh:            stopCh,
+		informer:          sharedInformer,
+		reactorController: p.ReactorController,
+	}
 
-func startController(lifecycle fx.Lifecycle, c *Controller) {
-	lifecycle.Append(fx.Hook{
+	p.Lifecycle.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			c.logger.Info("Starting reactor controller.")
 
@@ -191,26 +188,33 @@ func startController(lifecycle fx.Lifecycle, c *Controller) {
 			return nil
 		},
 	})
+
+	return nil
 }
 
 type Controller struct {
-	config    config.Config
-	logger    *zap.Logger
-	workQueue workqueue.RateLimitingInterface
-	stopCh    chan struct{}
-	informer  reactorv1alpha1.ReactorInformer
+	config            config.Config
+	logger            *zap.Logger
+	workQueue         workqueue.RateLimitingInterface
+	stopCh            chan struct{}
+	informer          reactorv1alpha1.ReactorInformer
+	reactorController reactorcontroller.Controller
 }
 
 func (c *Controller) processNextItem() bool {
 	newEvent, quit := c.workQueue.Get()
-
 	if quit {
 		return false
 	}
 
 	defer c.workQueue.Done(newEvent)
 
-	err := c.processItem(newEvent.(entity.Event))
+	_, err := c.reactorController.ProcessEvent(
+		context.Background(),
+		&reactorcontroller.ProcessEventParams{
+			Event: newEvent.(entity.Event),
+		},
+	)
 	if err != nil {
 		if c.workQueue.NumRequeues(newEvent) < c.config.Controller.WorkQueueEventRetries {
 			c.logger.Error(
@@ -235,9 +239,4 @@ func (c *Controller) processNextItem() bool {
 	c.workQueue.Forget(newEvent)
 
 	return true
-}
-
-func (c *Controller) processItem(event entity.Event) error {
-	fmt.Println(event)
-	return nil
 }
