@@ -20,8 +20,13 @@ spec:
             spec:
               type: object
               properties:
-                reactTo:
-                  type: string
+                reagent:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                  required:
+                    - name
                 deployment:
                   type: object
                   properties:
@@ -129,7 +134,7 @@ spec:
                   required:
                     - template
               required:
-                - reactTo
+                - reagent
                 - deployment
   # either Namespaced or Cluster
   scope: Namespaced

@@ -18,8 +18,12 @@ const (
 
 // ReactorSpec specifies the 'spec' of Reactor CRD.
 type ReactorSpec struct {
-	ReactTo    string                `json:"reactTo"`
+	Reagent    ReagentSpec           `json:"reagent"`
 	Deployment ReactorDeploymentSpec `json:"deployment"`
+}
+
+type ReagentSpec struct {
+	Name string `json:"name"`
 }
 
 type ReactorDeploymentSpec struct {
@@ -28,8 +32,6 @@ type ReactorDeploymentSpec struct {
 }
 
 type ReactorDeploymentTemplate struct {
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
 	Spec ReactorDeploymentTemplateSpec `json:"spec"`
 }
 

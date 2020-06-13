@@ -13,12 +13,13 @@ import (
 	"k8s.io/client-go/util/workqueue"
 
 	"github.com/yagehu/reactor-controller/config"
-	reactorcontroller "github.com/yagehu/reactor-controller/internal/controller/reactor"
+	reactorcontroller "github.com/yagehu/reactor-controller/internal/controller/reactorcontroller"
 	"github.com/yagehu/reactor-controller/internal/entity"
 	"github.com/yagehu/reactor-controller/pkg/apis/reactor/v1alpha1"
 	"github.com/yagehu/reactor-controller/pkg/generated/clientset/versioned"
 	"github.com/yagehu/reactor-controller/pkg/generated/clientset/versioned/scheme"
 	"github.com/yagehu/reactor-controller/pkg/generated/informers/externalversions"
+	reactorinformers "github.com/yagehu/reactor-controller/pkg/generated/informers/externalversions/reactor/v1alpha1"
 )
 
 var Module = fx.Invoke(Start)
@@ -26,121 +27,23 @@ var Module = fx.Invoke(Start)
 type Params struct {
 	fx.In
 
-	Config            config.Config
-	Lifecycle         fx.Lifecycle
-	Logger            *zap.Logger
-	KubernetesConfig  *rest.Config
-	ReactorClient     versioned.Interface
-	ReactorController reactorcontroller.Controller
+	Config                       config.Config
+	Lifecycle                    fx.Lifecycle
+	Logger                       *zap.Logger
+	KubernetesConfig             *rest.Config
+	ReactorClient                versioned.Interface
+	ReactorController            reactorcontroller.Controller
+	RateLimitingWorkQueue        workqueue.RateLimitingInterface
+	SharedReactorInformer        reactorinformers.ReactorInformer
+	SharedReactorInformerFactory externalversions.SharedInformerFactory
 }
 
 func Start(p Params) error {
 	stopCh := make(chan struct{})
-	wq := workqueue.NewRateLimitingQueue(
-		workqueue.DefaultControllerRateLimiter(),
-	)
-	sharedInformerFactory := externalversions.NewSharedInformerFactory(
-		p.ReactorClient, time.Minute,
-	)
-	sharedInformer := sharedInformerFactory.Huyage().V1alpha1().Reactors()
-	sharedInformer.Informer().AddEventHandler(
-		cache.ResourceEventHandlerFuncs{
-			AddFunc: func(obj interface{}) {
-				key, err := cache.MetaNamespaceKeyFunc(obj)
-				if err != nil {
-					p.Logger.Error(
-						"Could not make key for API object.",
-						zap.Error(err),
-					)
-
-					return
-				}
-
-				reactor, ok := obj.(*v1alpha1.Reactor)
-				if !ok {
-					p.Logger.Error(
-						"Not a Reactor object.",
-						zap.Any("object", obj),
-					)
-
-					return
-				}
-
-				wq.Add(entity.Event{
-					Key:         key,
-					Type:        entity.EventTypeCreate,
-					ReactorSpec: reactor.Spec,
-				})
-			},
-			UpdateFunc: func(oldObj, newObj interface{}) {
-				key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(newObj)
-				if err != nil {
-					p.Logger.Error(
-						"Could not make key for API object.",
-						zap.Error(err),
-						zap.Any("newObject", newObj),
-						zap.Any("oldObject", oldObj),
-					)
-
-					return
-				}
-
-				reactor, ok := newObj.(*v1alpha1.Reactor)
-				if !ok {
-					p.Logger.Error(
-						"Not a Reactor object.",
-						zap.Any("newObject", newObj),
-						zap.Any("oldObject", oldObj),
-					)
-
-					return
-				}
-
-				wq.Add(entity.Event{
-					Key:         key,
-					Type:        entity.EventTypeUpdate,
-					ReactorSpec: reactor.Spec,
-				})
-			},
-			DeleteFunc: func(obj interface{}) {
-				key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
-				if err != nil {
-					p.Logger.Error(
-						"Could not make key for API object.",
-						zap.Error(err),
-					)
-
-					return
-				}
-
-				reactor, ok := obj.(*v1alpha1.Reactor)
-				if !ok {
-					p.Logger.Error(
-						"Not a Reactor object.",
-						zap.Any("object", obj),
-					)
-
-					return
-				}
-
-				wq.Add(entity.Event{
-					Key:         key,
-					Type:        entity.EventTypeDelete,
-					ReactorSpec: reactor.Spec,
-				})
-			},
-		},
-	)
-	sharedInformerFactory.Start(stopCh)
-
-	if err := v1alpha1.AddToScheme(scheme.Scheme); err != nil {
-		return err
-	}
-
 	c := &Controller{
 		config:            p.Config,
 		logger:            p.Logger,
-		workQueue:         wq,
+		workQueue:         p.RateLimitingWorkQueue,
 		stopCh:            stopCh,
 		reactorController: p.ReactorController,
 	}
@@ -149,18 +52,23 @@ func Start(p Params) error {
 		OnStart: func(ctx context.Context) error {
 			c.logger.Info("Starting reactor controller.")
 
+			p.SharedReactorInformerFactory.Start(stopCh)
+			if err := v1alpha1.AddToScheme(scheme.Scheme); err != nil {
+				return err
+			}
+
 			// wait for the caches to synchronize before starting the worker
 			if !cache.WaitForNamedCacheSync(
 				"reactor-controller",
 				c.stopCh,
-				sharedInformer.Informer().HasSynced,
+				p.SharedReactorInformer.Informer().HasSynced,
 			) {
 				return errors.New("timed out waiting for caches to sync")
 			}
 
 			c.logger.Info("Reactor controller synced and ready.")
 
-			go sharedInformer.Informer().Run(c.stopCh)
+			go p.SharedReactorInformer.Informer().Run(c.stopCh)
 			go func() {
 				// Loop until "something bad" happens.
 				// The .Until will then rekick the worker after one second.
@@ -204,10 +112,23 @@ func (c *Controller) processNextItem() bool {
 
 	defer c.workQueue.Done(newEvent)
 
-	_, err := c.reactorController.ProcessEvent(
+	namespace, name, err := cache.SplitMetaNamespaceKey(
+		newEvent.(entity.Event).Key,
+	)
+	if err != nil {
+		c.logger.Error(
+			"Could not get namespace and name from event.", zap.Error(err),
+		)
+		c.workQueue.Forget(newEvent)
+
+		return true
+	}
+
+	_, err = c.reactorController.ProcessEvent(
 		context.Background(),
 		&reactorcontroller.ProcessEventParams{
-			Event: newEvent.(entity.Event),
+			Name:      name,
+			Namespace: namespace,
 		},
 	)
 	if err != nil {
