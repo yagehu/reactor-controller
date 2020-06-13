@@ -2,7 +2,9 @@ package reactor
 
 import (
 	"context"
+	"database/sql"
 
+	"github.com/yagehu/reactor-controller/internal/errs"
 	"github.com/yagehu/reactor-controller/internal/model"
 )
 
@@ -17,30 +19,44 @@ type GetReactorByNameResult struct {
 func (r *repository) GetReactorByName(
 	ctx context.Context, p *GetReactorByNameParams,
 ) (*GetReactorByNameResult, error) {
-	var record model.Reactor
+	var (
+		op     errs.Op = "repository/reactor.GetReactorByName"
+		record model.Reactor
+	)
 
-	err := r.db.QueryRowContext(ctx, `
+	err := r.db.QueryRowContext(
+		ctx,
+		`
 SELECT
     reactor.id,
     reactor.name,
+    reagent.id,
     reagent.name,
     reactor.created_at,
     reactor.deleted_at
 FROM reactor
 LEFT JOIN reagent ON reactor.reagent_id = reagent.id
 WHERE
-	deleted_at IS NOT NULL
+    reactor.name = $1
+    AND deleted_at IS NULL
 LIMIT 1
-	`).
+		`,
+		p.Name,
+	).
 		Scan(
 			&record.ID,
 			&record.Name,
+			&record.Reagent.ID,
 			&record.Reagent.Name,
 			&record.CreatedAt,
 			&record.DeletedAt,
 		)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, errs.E(op, errs.KindReactorNotFound, err)
+		}
+
+		return nil, errs.E(op, err)
 	}
 
 	return &GetReactorByNameResult{Record: record}, nil

@@ -22,10 +22,11 @@ WITH reagent AS (
     VALUES ($1, $2)
     RETURNING id
 )
-INSERT INTO reactor (id, reagent_id)
+INSERT INTO reactor (id, name, reagent_id)
 VALUES (
     $3,
-	(SELECT id FROM reagent)
+    $4,
+    (SELECT id FROM reagent)
 )
 	`)
 	if err != nil {
@@ -37,6 +38,7 @@ VALUES (
 		p.Reactor.Reagent.ID,
 		p.Reactor.Reagent.Name,
 		p.Reactor.ID,
+		p.Reactor.Name,
 	)
 	if err != nil {
 		return nil, err

@@ -2,6 +2,7 @@ package reactor
 
 import (
 	"context"
+	"time"
 
 	"github.com/gofrs/uuid"
 
@@ -11,6 +12,7 @@ import (
 )
 
 type CreateReactorParams struct {
+	Name        string
 	ReagentName string
 }
 
@@ -32,11 +34,13 @@ func (c *controller) CreateReactor(
 	}
 
 	reactor := entity.Reactor{
-		ID: reactorID,
+		ID:   reactorID,
+		Name: p.Name,
 		Reagent: entity.Reagent{
 			ID:   reagentID,
 			Name: p.ReagentName,
 		},
+		CreatedAt: time.Now(),
 	}
 
 	_, err = c.reactorRepository.CreateReactor(
