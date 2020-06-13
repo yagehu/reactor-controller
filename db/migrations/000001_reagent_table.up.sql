@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS reagent (
+    id UUID PRIMARY KEY,
+    name VARCHAR(64) NOT NULL
+);

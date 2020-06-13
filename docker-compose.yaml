@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:12-alpine
+    deploy:
+      replicas: 1
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    networks:
+      - reactor
+    volumes:
+      - db-data
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    deploy:
+      replicas: 1
+    ports:
+      - 5433:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: test@example.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    networks:
+      - reactor
+volumes:
+  db-data:
+networks:
+  reactor:
+    driver: bridge

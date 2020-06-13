@@ -11,6 +11,7 @@ import (
 	"github.com/yagehu/reactor-controller/internal/fx/zapfx"
 	"github.com/yagehu/reactor-controller/internal/handler"
 	"github.com/yagehu/reactor-controller/internal/reactor"
+	"github.com/yagehu/reactor-controller/internal/repository"
 )
 
 func main() {
@@ -23,6 +24,7 @@ func opts() fx.Option {
 		controller.Module,
 		handler.Module,
 		reactor.Module,
+		repository.Module,
 
 		httpfx.Module,
 		middlewarefx.Module,

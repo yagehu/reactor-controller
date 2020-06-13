@@ -1,3 +1,0 @@
-CREATE TABLE IF NOT EXISTS reactor(
-    id uuid PRIMARY KEY
-);
