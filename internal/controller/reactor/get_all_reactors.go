@@ -17,7 +17,7 @@ type GetAllReactorsResult struct {
 }
 
 func (c *controller) GetAllReactors(
-	ctx context.Context, p *GetAllReactorsParams,
+	ctx context.Context, _ *GetAllReactorsParams,
 ) (*GetAllReactorsResult, error) {
 	var op errs.Op = "controller/reactor.GetAllReactors"
 
