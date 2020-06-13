@@ -1,6 +1,13 @@
 linters:
   enable:
-    - megacheck
+    - bodyclose
+    - dogsled
+    - gocyclo
+    - golint
     - govet
+    - megacheck
+    - prealloc
+    - rowserrcheck
+    - unparam
     - wsl
   disable-all: false

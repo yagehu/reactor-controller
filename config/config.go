@@ -28,13 +28,13 @@ type Config struct {
 		WorkQueueEventRetries int `yaml:"work_queue_event_retries"`
 	} `yaml:"controller"`
 
-	Http struct {
+	HTTP struct {
 		Host string `yaml:"host"`
 		Port string `yaml:"port"`
 	} `yaml:"http"`
 
 	Kubernetes struct {
-		ApiServer struct {
+		APIServer struct {
 			Host string `yaml:"host"`
 			Port string `yaml:"port"`
 		} `yaml:"api_server"`

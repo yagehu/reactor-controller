@@ -37,7 +37,7 @@ type Result struct {
 func New(p Params) (Result, error) {
 	router := mux.NewRouter()
 	server := http.Server{
-		Addr:    net.JoinHostPort(p.Config.Http.Host, p.Config.Http.Port),
+		Addr:    net.JoinHostPort(p.Config.HTTP.Host, p.Config.HTTP.Port),
 		Handler: p.LoggingMiddleware.Apply(router),
 	}
 

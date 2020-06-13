@@ -28,14 +28,14 @@ type Result struct {
 	Client              kubernetes.Interface
 	Config              *rest.Config
 	ReactorClient       versioned.Interface
-	ApiExtensionsClient apiextensionsclientset.Interface
+	APIExtensionsClient apiextensionsclientset.Interface
 }
 
 func New(p Params) (Result, error) {
 	conf := rest.Config{
 		Host: "http://" + net.JoinHostPort(
-			p.Config.Kubernetes.ApiServer.Host,
-			p.Config.Kubernetes.ApiServer.Port,
+			p.Config.Kubernetes.APIServer.Host,
+			p.Config.Kubernetes.APIServer.Port,
 		),
 	}
 
@@ -68,6 +68,6 @@ func New(p Params) (Result, error) {
 		Client:              clientset,
 		Config:              &conf,
 		ReactorClient:       reactorClient,
-		ApiExtensionsClient: apiExtensionsClient,
+		APIExtensionsClient: apiExtensionsClient,
 	}, nil
 }

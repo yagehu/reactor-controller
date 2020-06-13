@@ -44,3 +44,7 @@ migrate-down:
 		-database $(POSTGRES_URL) \
 		-path db/migrations \
 		down
+
+.PHONY: lint
+lint:
+	@golangci-lint run
