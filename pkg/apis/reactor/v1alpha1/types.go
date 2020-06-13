@@ -1,6 +1,9 @@
 package v1alpha1
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // These const variables are used in our custom controller.
 const (
@@ -15,11 +18,31 @@ const (
 
 // ReactorSpec specifies the 'spec' of Reactor CRD.
 type ReactorSpec struct {
-	ReactTo string `json:"reactTo"`
-	Product struct {
-		Name  string `json:"name"`
-		Image string `json:"image"`
-	} `json:"product"`
+	ReactTo    string                `json:"reactTo"`
+	Deployment ReactorDeploymentSpec `json:"deployment"`
+}
+
+type ReactorDeploymentSpec struct {
+	Replicas int                       `json:"replicas"`
+	Template ReactorDeploymentTemplate `json:"template"`
+}
+
+type ReactorDeploymentTemplate struct {
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec ReactorDeploymentTemplateSpec `json:"spec"`
+}
+
+type ReactorDeploymentTemplateSpec struct {
+	Containers []Container `json:"containers"`
+}
+
+type Container struct {
+	Args    []string    `json:"args"`
+	Command []string    `json:"command"`
+	Env     []v1.EnvVar `json:"env"`
+	Image   string      `json:"image,omitempty"`
+	Name    string      `json:"name"`
 }
 
 // +genclient

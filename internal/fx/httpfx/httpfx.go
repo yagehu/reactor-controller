@@ -57,7 +57,11 @@ func startServer(
 		OnStart: func(_ context.Context) error {
 			go func() {
 				if err := server.ListenAndServe(); err != nil {
-					logger.Error("Could not start HTTP server.", zap.Error(err))
+					if err == http.ErrServerClosed {
+						logger.Info("HTTP server closed.")
+					} else {
+						logger.Error("HTTP server error.", zap.Error(err))
+					}
 					_ = shutdowner.Shutdown()
 				}
 			}()

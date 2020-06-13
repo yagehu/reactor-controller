@@ -86,6 +86,18 @@ func (c *FakeReactors) Update(ctx context.Context, reactor *v1alpha1.Reactor, op
 	return obj.(*v1alpha1.Reactor), err
 }
 
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+func (c *FakeReactors) UpdateStatus(ctx context.Context, reactor *v1alpha1.Reactor, opts v1.UpdateOptions) (*v1alpha1.Reactor, error) {
+	obj, err := c.Fake.
+		Invokes(testing.NewUpdateSubresourceAction(reactorsResource, "status", c.ns, reactor), &v1alpha1.Reactor{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1alpha1.Reactor), err
+}
+
 // Delete takes name of the reactor and deletes it. Returns an error if one occurs.
 func (c *FakeReactors) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.

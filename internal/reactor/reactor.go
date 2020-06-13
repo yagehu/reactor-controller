@@ -1,4 +1,4 @@
-package reactorcontroller
+package reactor
 
 import (
 	"context"
@@ -21,7 +21,7 @@ import (
 	"github.com/yagehu/reactor-controller/pkg/generated/informers/externalversions"
 )
 
-var Module = fx.Options(fx.Invoke(Start))
+var Module = fx.Invoke(Start)
 
 type Params struct {
 	fx.In

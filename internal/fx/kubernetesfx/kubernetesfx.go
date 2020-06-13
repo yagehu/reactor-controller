@@ -5,6 +5,7 @@ import (
 
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
@@ -24,9 +25,10 @@ type Params struct {
 type Result struct {
 	fx.Out
 
-	Client        kubernetes.Interface
-	Config        *rest.Config
-	ReactorClient versioned.Interface
+	Client              kubernetes.Interface
+	Config              *rest.Config
+	ReactorClient       versioned.Interface
+	ApiExtensionsClient apiextensionsclientset.Interface
 }
 
 func New(p Params) (Result, error) {
@@ -38,6 +40,11 @@ func New(p Params) (Result, error) {
 	}
 
 	clientset, err := kubernetes.NewForConfig(&conf)
+	if err != nil {
+		return Result{}, err
+	}
+
+	apiExtensionsClient, err := apiextensionsclientset.NewForConfig(&conf)
 	if err != nil {
 		return Result{}, err
 	}
@@ -58,8 +65,9 @@ func New(p Params) (Result, error) {
 	}
 
 	return Result{
-		Client:        clientset,
-		Config:        &conf,
-		ReactorClient: reactorClient,
+		Client:              clientset,
+		Config:              &conf,
+		ReactorClient:       reactorClient,
+		ApiExtensionsClient: apiExtensionsClient,
 	}, nil
 }

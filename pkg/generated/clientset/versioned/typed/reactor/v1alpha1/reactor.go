@@ -24,6 +24,7 @@ type ReactorsGetter interface {
 type ReactorInterface interface {
 	Create(ctx context.Context, reactor *v1alpha1.Reactor, opts v1.CreateOptions) (*v1alpha1.Reactor, error)
 	Update(ctx context.Context, reactor *v1alpha1.Reactor, opts v1.UpdateOptions) (*v1alpha1.Reactor, error)
+	UpdateStatus(ctx context.Context, reactor *v1alpha1.Reactor, opts v1.UpdateOptions) (*v1alpha1.Reactor, error)
 	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
 	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
 	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.Reactor, error)
@@ -112,6 +113,22 @@ func (c *reactors) Update(ctx context.Context, reactor *v1alpha1.Reactor, opts v
 		Namespace(c.ns).
 		Resource("reactors").
 		Name(reactor.Name).
+		VersionedParams(&opts, scheme.ParameterCodec).
+		Body(reactor).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+func (c *reactors) UpdateStatus(ctx context.Context, reactor *v1alpha1.Reactor, opts v1.UpdateOptions) (result *v1alpha1.Reactor, err error) {
+	result = &v1alpha1.Reactor{}
+	err = c.client.Put().
+		Namespace(c.ns).
+		Resource("reactors").
+		Name(reactor.Name).
+		SubResource("status").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(reactor).
 		Do(ctx).

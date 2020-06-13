@@ -10,7 +10,7 @@ import (
 	"github.com/yagehu/reactor-controller/internal/fx/middlewarefx"
 	"github.com/yagehu/reactor-controller/internal/fx/zapfx"
 	"github.com/yagehu/reactor-controller/internal/handler"
-	"github.com/yagehu/reactor-controller/internal/reactorcontroller"
+	"github.com/yagehu/reactor-controller/internal/reactor"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func opts() fx.Option {
 		config.Module,
 		controller.Module,
 		handler.Module,
-		reactorcontroller.Module,
+		reactor.Module,
 
 		httpfx.Module,
 		middlewarefx.Module,
