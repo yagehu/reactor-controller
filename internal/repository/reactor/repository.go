@@ -11,6 +11,12 @@ type Repository interface {
 	CreateReactor(
 		context.Context, *CreateReactorParams,
 	) (*CreateReactorResult, error)
+	DeleteReactor(
+		context.Context, *DeleteReactorParams,
+	) (*DeleteReactorResult, error)
+	GetReactorByName(
+		context.Context, *GetReactorByNameParams,
+	) (*GetReactorByNameResult, error)
 }
 
 type Params struct {

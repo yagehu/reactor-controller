@@ -1,4 +1,7 @@
-CREATE TABLE IF NOT EXISTS reactor(
+CREATE TABLE IF NOT EXISTS reactor (
     id UUID PRIMARY KEY,
-    reagent_id UUID REFERENCES reagent (id)
+    name VARCHAR(64) NOT NULL,
+    reagent_id UUID REFERENCES reagent (id),
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    deleted_at TIMESTAMP NULL
 );

@@ -12,6 +12,9 @@ type Controller interface {
 	CreateReactor(
 		context.Context, *CreateReactorParams,
 	) (*CreateReactorResult, error)
+	DeleteReactor(
+		context.Context, *DeleteReactorParams,
+	) (*DeleteReactorResult, error)
 }
 
 type Params struct {
