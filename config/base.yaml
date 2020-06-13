@@ -9,3 +9,10 @@ kubernetes:
   api_server:
     host: localhost
     port: "9000"
+
+postgres:
+  host: localhost
+  port: "5432"
+  user: reactor
+  password: reactor
+  database: reactor-controller

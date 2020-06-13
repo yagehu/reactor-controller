@@ -39,6 +39,14 @@ type Config struct {
 			Port string `yaml:"port"`
 		} `yaml:"api_server"`
 	} `yaml:"kubernetes"`
+
+	Postgres struct {
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+		Database string `yaml:"database"`
+	} `yaml:"postgres"`
 }
 
 func New() (Config, error) {

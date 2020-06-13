@@ -5,6 +5,7 @@ import (
 
 	"github.com/yagehu/reactor-controller/config"
 	"github.com/yagehu/reactor-controller/internal/controller"
+	"github.com/yagehu/reactor-controller/internal/fx/dbfx"
 	"github.com/yagehu/reactor-controller/internal/fx/httpfx"
 	"github.com/yagehu/reactor-controller/internal/fx/kubernetesfx"
 	"github.com/yagehu/reactor-controller/internal/fx/middlewarefx"
@@ -26,6 +27,7 @@ func opts() fx.Option {
 		reactor.Module,
 		repository.Module,
 
+		dbfx.Module,
 		httpfx.Module,
 		middlewarefx.Module,
 		kubernetesfx.Module,
