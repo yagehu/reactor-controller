@@ -15,6 +15,9 @@ type Controller interface {
 	DeleteReactor(
 		context.Context, *DeleteReactorParams,
 	) (*DeleteReactorResult, error)
+	GetAllReactors(
+		context.Context, *GetAllReactorsParams,
+	) (*GetAllReactorsResult, error)
 	GetReactorByName(
 		context.Context, *GetReactorByNameParams,
 	) (*GetReactorByNameResult, error)

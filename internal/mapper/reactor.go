@@ -26,6 +26,21 @@ func FromReactorModel(x model.Reactor) (entity.Reactor, error) {
 	}, nil
 }
 
+func FromReactorModelList(xs []model.Reactor) ([]entity.Reactor, error) {
+	s := make([]entity.Reactor, len(xs))
+
+	for i, x := range xs {
+		reactor, err := FromReactorModel(x)
+		if err != nil {
+			return nil, err
+		}
+
+		s[i] = reactor
+	}
+
+	return s, nil
+}
+
 func ToReactorModel(x entity.Reactor) model.Reactor {
 	return model.Reactor{
 		ID:        x.ID.String(),
