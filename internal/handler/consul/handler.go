@@ -6,6 +6,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"go.uber.org/fx"
+
+	consulcontroller "github.com/yagehu/reactor-controller/internal/controller/consul"
 )
 
 var Module = fx.Invoke(Register)
@@ -17,12 +19,15 @@ type Handler interface {
 type Params struct {
 	fx.In
 
-	Lifecycle fx.Lifecycle
-	Router    *mux.Router
+	Lifecycle        fx.Lifecycle
+	Router           *mux.Router
+	ConsulController consulcontroller.Controller
 }
 
 func Register(p Params) {
-	h := handler{}
+	h := handler{
+		consulController: p.ConsulController,
+	}
 
 	p.Lifecycle.Append(fx.Hook{
 		OnStart: func(_ context.Context) error {
@@ -35,8 +40,5 @@ func Register(p Params) {
 }
 
 type handler struct {
-}
-
-func (h *handler) WatchEvent(w http.ResponseWriter, r *http.Request) {
-
+	consulController consulcontroller.Controller
 }
