@@ -2,14 +2,16 @@ package consul
 
 import (
 	"context"
+	"fmt"
 
 	reactorcontroller "github.com/yagehu/reactor-controller/internal/controller/reactor"
+	reagentinstancecontroller "github.com/yagehu/reactor-controller/internal/controller/reagentinstance"
 	"github.com/yagehu/reactor-controller/internal/entity"
 	"github.com/yagehu/reactor-controller/internal/errs"
 )
 
 type HandleWatchEventParams struct {
-	ReagentInstances []entity.ReagentInstance
+	Sources []entity.Source
 }
 
 type HandleWatchEventResult struct {
@@ -20,21 +22,31 @@ func (c *controller) HandleWatchEvent(
 ) (*HandleWatchEventResult, error) {
 	var (
 		op       errs.Op = "controller/consul.HandleWatchEvent"
-		reactors         = make(map[string][]entity.Reactor)
+		reactors         = make(map[entity.Reagent][]entity.Reactor)
 	)
 
-	res, err := c.reactorController.GetAllReactors(
+	res1, err := c.reactorController.GetAllReactors(
 		ctx, &reactorcontroller.GetAllReactorsParams{},
 	)
 	if err != nil {
 		return nil, errs.E(op, err)
 	}
 
-	for _, reactor := range res.Reactors {
-		reactors[reactor.Reagent.Name] = append(
-			reactors[reactor.Reagent.Name], reactor,
+	for _, reactor := range res1.Reactors {
+		reactors[reactor.Reagent] = append(
+			reactors[reactor.Reagent], reactor,
 		)
 	}
+
+	res2 := c.reagentInstanceController.FilterSources(
+		ctx,
+		&reagentinstancecontroller.FilterSourcesParams{
+			Sources:     p.Sources,
+			ReactorsMap: reactors,
+		},
+	)
+
+	fmt.Println(res2.ReagentInstances)
 
 	return &HandleWatchEventResult{}, nil
 }

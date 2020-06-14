@@ -25,6 +25,8 @@ spec:
                   properties:
                     name:
                       type: string
+                    idPrefix:
+                      type: string
                   required:
                     - name
                 deployment:

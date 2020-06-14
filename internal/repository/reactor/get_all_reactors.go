@@ -30,6 +30,7 @@ SELECT
     reactor.name,
     reagent.id,
     reagent.name,
+    reagent.id_prefix,
     reactor.created_at
 FROM
     reactor
@@ -56,6 +57,7 @@ WHERE
 			&reactor.Name,
 			&reactor.Reagent.ID,
 			&reactor.Reagent.Name,
+			&reactor.Reagent.IDPrefix,
 			&reactor.CreatedAt,
 		)
 		if err != nil {

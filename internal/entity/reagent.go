@@ -5,6 +5,7 @@ import (
 )
 
 type Reagent struct {
-	ID   uuid.UUID
-	Name string
+	ID       uuid.UUID
+	Name     string
+	IDPrefix string
 }

@@ -18,14 +18,14 @@ func (r *repository) CreateReactor(
 ) (*CreateReactorResult, error) {
 	stmt, err := r.db.Prepare(`
 WITH reagent AS (
-    INSERT INTO reagent (id, name)
-    VALUES ($1, $2)
+    INSERT INTO reagent (id, name, id_prefix)
+    VALUES ($1, $2, $3)
     RETURNING id
 )
 INSERT INTO reactor (id, name, reagent_id)
 VALUES (
-    $3,
     $4,
+    $5,
     (SELECT id FROM reagent)
 )
 	`)
@@ -37,6 +37,7 @@ VALUES (
 		ctx,
 		p.Reactor.Reagent.ID,
 		p.Reactor.Reagent.Name,
+		p.Reactor.Reagent.IDPrefix,
 		p.Reactor.ID,
 		p.Reactor.Name,
 	)

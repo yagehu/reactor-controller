@@ -12,8 +12,9 @@ import (
 )
 
 type CreateReactorParams struct {
-	Name        string
-	ReagentName string
+	Name            string
+	ReagentName     string
+	ReagentIDPrefix string
 }
 
 type CreateReactorResult struct {
@@ -37,8 +38,9 @@ func (c *controller) CreateReactor(
 		ID:   reactorID,
 		Name: p.Name,
 		Reagent: entity.Reagent{
-			ID:   reagentID,
-			Name: p.ReagentName,
+			ID:       reagentID,
+			Name:     p.ReagentName,
+			IDPrefix: p.ReagentIDPrefix,
 		},
 		CreatedAt: time.Now(),
 	}

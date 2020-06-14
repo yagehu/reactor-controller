@@ -59,8 +59,9 @@ func (c *controller) ProcessEvent(
 
 		_, err := c.reactorController.CreateReactor(
 			ctx, &reactorcontroller.CreateReactorParams{
-				Name:        reactor.Name,
-				ReagentName: reactor.Spec.Reagent.Name,
+				Name:            reactor.Name,
+				ReagentName:     reactor.Spec.Reagent.Name,
+				ReagentIDPrefix: reactor.Spec.Reagent.IDPrefix,
 			},
 		)
 		if err != nil {

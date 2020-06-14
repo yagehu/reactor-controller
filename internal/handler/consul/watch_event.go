@@ -20,7 +20,7 @@ func (h *handler) WatchEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	reagentInstances := make([]entity.ReagentInstance, 0, len(request))
+	reagentInstances := make([]entity.Source, 0, len(request))
 
 	for name, tags := range request {
 		tagsMap := make(map[string]struct{})
@@ -29,7 +29,7 @@ func (h *handler) WatchEvent(w http.ResponseWriter, r *http.Request) {
 			tagsMap[tag] = struct{}{}
 		}
 
-		reagentInstances = append(reagentInstances, entity.ReagentInstance{
+		reagentInstances = append(reagentInstances, entity.Source{
 			Name: name,
 			Tags: tagsMap,
 		})
@@ -38,7 +38,7 @@ func (h *handler) WatchEvent(w http.ResponseWriter, r *http.Request) {
 	_, err := h.consulController.HandleWatchEvent(
 		r.Context(),
 		&consulcontroller.HandleWatchEventParams{
-			ReagentInstances: reagentInstances,
+			Sources: reagentInstances,
 		},
 	)
 	if err != nil {

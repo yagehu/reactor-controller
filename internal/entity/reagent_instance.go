@@ -1,6 +1,10 @@
 package entity
 
+import (
+	"github.com/gofrs/uuid"
+)
+
 type ReagentInstance struct {
-	Name string
-	Tags map[string]struct{}
+	ID       uuid.UUID
+	Reactors []Reactor
 }

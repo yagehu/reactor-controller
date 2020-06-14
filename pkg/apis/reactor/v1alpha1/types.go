@@ -23,7 +23,8 @@ type ReactorSpec struct {
 }
 
 type ReagentSpec struct {
-	Name string `json:"name"`
+	Name     string `json:"name"`
+	IDPrefix string `json:"idPrefix"`
 }
 
 type ReactorDeploymentSpec struct {

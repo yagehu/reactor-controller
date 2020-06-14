@@ -13,7 +13,7 @@ func FromReactorModel(x model.Reactor) (entity.Reactor, error) {
 		return entity.Reactor{}, err
 	}
 
-	reagent, err := FromReagentModule(x.Reagent)
+	reagent, err := FromReagentModel(x.Reagent)
 	if err != nil {
 		return entity.Reactor{}, err
 	}

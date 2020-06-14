@@ -32,6 +32,7 @@ SELECT
     reactor.name,
     reagent.id,
     reagent.name,
+    reagent.id_prefix,
     reactor.created_at,
     reactor.deleted_at
 FROM reactor
@@ -48,6 +49,7 @@ LIMIT 1
 			&record.Name,
 			&record.Reagent.ID,
 			&record.Reagent.Name,
+			&record.Reagent.IDPrefix,
 			&record.CreatedAt,
 			&record.DeletedAt,
 		)
