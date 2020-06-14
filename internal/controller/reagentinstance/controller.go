@@ -12,9 +12,6 @@ type Controller interface {
 	EnsureReagentInstanceIsActive(
 		context.Context, *EnsureReagentInstanceIsActiveParams,
 	) (*EnsureReagentInstanceIsActiveResult, error)
-	FilterSources(
-		context.Context, *FilterSourcesParams,
-	) *FilterSourcesResult
 }
 
 type Params struct {

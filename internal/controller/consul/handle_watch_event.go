@@ -3,9 +3,11 @@ package consul
 import (
 	"context"
 	"fmt"
+	"strings"
+
+	"github.com/gofrs/uuid"
 
 	reactorcontroller "github.com/yagehu/reactor-controller/internal/controller/reactor"
-	reagentinstancecontroller "github.com/yagehu/reactor-controller/internal/controller/reagentinstance"
 	"github.com/yagehu/reactor-controller/internal/entity"
 	"github.com/yagehu/reactor-controller/internal/errs"
 )
@@ -38,15 +40,48 @@ func (c *controller) HandleWatchEvent(
 		)
 	}
 
-	res2 := c.reagentInstanceController.FilterSources(
-		ctx,
-		&reagentinstancecontroller.FilterSourcesParams{
-			Sources:     p.Sources,
-			ReactorsMap: reactors,
-		},
-	)
+	reagentInstances := filterSources(p.Sources, reactors)
 
-	fmt.Println(res2.ReagentInstances)
+	fmt.Println(reagentInstances)
 
 	return &HandleWatchEventResult{}, nil
+}
+
+func filterSources(
+	sources []entity.Source,
+	reactorsMap map[entity.Reagent][]entity.Reactor,
+) []entity.ReagentInstance {
+	var reagentInstances []entity.ReagentInstance
+
+	for _, source := range sources {
+		for reagent, reactors := range reactorsMap {
+			_, ok := source.Tags[reagent.Name]
+			if !ok {
+				continue
+			}
+
+			var id string
+
+			for tag := range source.Tags {
+				if strings.HasPrefix(tag, reagent.IDPrefix) {
+					id = strings.TrimLeft(tag, reagent.IDPrefix)
+					break
+				}
+			}
+
+			reagentInstanceID, err := uuid.FromString(id)
+			if err != nil {
+				continue
+			}
+
+			reagentInstances = append(reagentInstances, entity.ReagentInstance{
+				ID:       reagentInstanceID,
+				Reactors: reactors,
+			})
+
+			break
+		}
+	}
+
+	return reagentInstances
 }
